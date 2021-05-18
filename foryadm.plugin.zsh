@@ -7,9 +7,9 @@ foryadm::inside_work_tree() { yadm rev-parse --is-inside-work-tree >/dev/null; }
 # https://github.com/wfxr/emoji-cli
 hash emojify &>/dev/null && foryadm_emojify='|emojify'
 
-foryadm_pager=${FORYADM_PAGER:-$(yadm config core.pager || echo 'cat')}
-foryadm_show_pager=${FORYADM_SHOW_PAGER:-$(yadm config pager.show || echo "$foryadm_pager")}
-foryadm_diff_pager=${FORYADM_DIFF_PAGER:-$(yadm config pager.diff || echo "$foryadm_pager")}
+foryadm_pager=${FORYADM_PAGER:-$(git config core.pager || echo 'cat')}
+foryadm_show_pager=${FORYADM_SHOW_PAGER:-$(git config pager.show || echo "$foryadm_pager")}
+foryadm_diff_pager=${FORYADM_DIFF_PAGER:-$(git config pager.diff || echo "$foryadm_pager")}
 foryadm_ignore_pager=${FORYADM_IGNORE_PAGER:-$(hash bat &>/dev/null && echo 'bat -l gitignore --color=always' || echo 'cat')}
 
 foryadm_log_format=${FORYADM_LOG_FORMAT:-%C(auto)%h%d %s %C(black)%C(bold)%cr%Creset}
@@ -250,7 +250,7 @@ foryadm::checkout::commit() {
 
 # yadm ignore generator
 export FORYADM_GI_REPO_REMOTE=${FORYADM_GI_REPO_REMOTE:-https://github.com/dvcs/gitignore}
-export FORYADM_GI_REPO_LOCAL="${FORYADM_GI_REPO_LOCAL:-${XDG_CACHE_HOME:-$HOME/.cache}/forgit/gi/repos/dvcs/gitignore}"
+export FORYADM_GI_REPO_LOCAL="${FORYADM_GI_REPO_LOCAL:-${XDG_CACHE_HOME:-$HOME/.cache}/foryadm/gi/repos/dvcs/gitignore}"
 export FORYADM_GI_TEMPLATES=${FORYADM_GI_TEMPLATES:-$FORYADM_GI_REPO_LOCAL/templates}
 
 foryadm::ignore() {

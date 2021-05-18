@@ -18,9 +18,9 @@ set -g foryadm_diff_pager   "$FORYADM_DIFF_PAGER"
 set -g foryadm_ignore_pager "$FORYADM_IGNORE_PAGER"
 set -g foryadm_log_format   "$FORYADM_LOG_FORMAT"
 
-test -z "$foryadm_pager";        and set -g foryadm_pager        (yadm config core.pager || echo 'cat')
-test -z "$foryadm_show_pager";   and set -g foryadm_show_pager   (yadm config pager.show || echo "$foryadm_pager")
-test -z "$foryadm_diff_pager";   and set -g foryadm_diff_pager   (yadm config pager.diff || echo "$foryadm_pager")
+test -z "$foryadm_pager";        and set -g foryadm_pager        (git config core.pager || echo 'cat')
+test -z "$foryadm_show_pager";   and set -g foryadm_show_pager   (git config pager.show || echo "$foryadm_pager")
+test -z "$foryadm_diff_pager";   and set -g foryadm_diff_pager   (git config pager.diff || echo "$foryadm_pager")
 test -z "$foryadm_ignore_pager"; and set -g foryadm_ignore_pager (type -q bat >/dev/null 2>&1 && echo 'bat -l gitignore --color=always' || echo 'cat')
 test -z "$foryadm_log_format";   and set -g foryadm_log_format   "-%C(auto)%h%d %s %C(black)%C(bold)%cr%Creset"
 
@@ -369,9 +369,9 @@ end
 
 if test -z "$FORYADM_GI_REPO_LOCAL"
     if test "XDG_CACHE_HOME"
-        set -g FORYADM_GI_REPO_LOCAL $XDG_CACHE_HOME/forgit/gi/repos/dvcs/gitignore
+        set -g FORYADM_GI_REPO_LOCAL $XDG_CACHE_HOME/foryadm/gi/repos/dvcs/gitignore
     else
-        set -g FORYADM_GI_REPO_LOCAL $HOME/.cache/forgit/gi/repos/dvcs/gitignore
+        set -g FORYADM_GI_REPO_LOCAL $HOME/.cache/foryadm/gi/repos/dvcs/gitignore
     end
 end
 
