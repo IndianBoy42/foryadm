@@ -128,8 +128,8 @@ You can change the default aliases by defining these variables below.
 
 ``` bash
 foryadm_log=yadlo
-foryadm_diff=yadd
-foryadm_add=yada
+foryadm_diff=yadiff
+foryadm_add=yadd
 foryadm_reset_head=yadrh
 foryadm_ignore=yadi
 foryadm_checkout_file=yadcf

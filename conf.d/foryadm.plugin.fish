@@ -110,7 +110,7 @@ function foryadm::add -d "yadm add selector"
         -0 -m --nth 2..,..
         $FORYADM_ADD_FZF_OPTS
     "
-    set files (yadm -c color.status=always -c status.relativePaths=true status -su |
+    set files (yadm -c color.status=always -c status.relativePaths=true status -s |
         grep -F -e "$changed" -e "$unmerged" -e "$untracked" |
         sed -E 's/^(..[^[:space:]]*)[[:space:]]+(.*)\$/[\1]  \2/' |   # deal with white spaces internal to fname
         env FZF_DEFAULT_OPTS="$opts" fzf --preview="$preview" |
@@ -457,7 +457,7 @@ if test -z "$FORYADM_NO_ALIASES"
     if test -n "$foryadm_add"
         alias $foryadm_add 'foryadm::add'
     else
-        alias yada 'foryadm::add'
+        alias yadd 'foryadm::add'
     end
 
     if test -n "$foryadm_reset_head"
@@ -475,7 +475,7 @@ if test -z "$FORYADM_NO_ALIASES"
     if test -n "$foryadm_diff"
         alias $foryadm_diff 'foryadm::diff'
     else
-        alias yadd 'foryadm::diff'
+        alias yadiff 'foryadm::diff'
     end
 
     if test -n "$foryadm_ignore"

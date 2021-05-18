@@ -314,10 +314,10 @@ $FORYADM_FZF_DEFAULT_OPTS
 # register aliases
 # shellcheck disable=SC2139
 if [[ -z "$FORYADM_NO_ALIASES" ]]; then
-    alias "${foryadm_add:-yada}"='foryadm::add'
+    alias "${foryadm_add:-yadd}"='foryadm::add'
     alias "${foryadm_reset_head:-yadrh}"='foryadm::reset::head'
     alias "${foryadm_log:-yadlo}"='foryadm::log'
-    alias "${foryadm_diff:-yadd}"='foryadm::diff'
+    alias "${foryadm_diff:-yadiff}"='foryadm::diff'
     alias "${foryadm_ignore:-yadi}"='foryadm::ignore'
     alias "${foryadm_checkout_file:-yadcf}"='foryadm::checkout::file'
     alias "${foryadm_checkout_branch:-yadcb}"='foryadm::checkout::branch'
