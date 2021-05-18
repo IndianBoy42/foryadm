@@ -1,94 +1,94 @@
 # MIT (c) Chris Apple
 
-function forgit::warn
+function foryadm::warn
     printf "%b[Warn]%b %s\n" '\e[0;33m' '\e[0m' "$argv" >&2;
 end
 
-function forgit::info
+function foryadm::info
     printf "%b[Info]%b %s\n" '\e[0;32m' '\e[0m' "$argv" >&2;
 end
 
-function forgit::inside_work_tree
-    git rev-parse --is-inside-work-tree >/dev/null;
+function foryadm::inside_work_tree
+    yadm rev-parse --is-inside-work-tree >/dev/null;
 end
 
-set -g forgit_pager        "$FORGIT_PAGER"
-set -g forgit_show_pager   "$FORGIT_SHOW_PAGER"
-set -g forgit_diff_pager   "$FORGIT_DIFF_PAGER"
-set -g forgit_ignore_pager "$FORGIT_IGNORE_PAGER"
-set -g forgit_log_format   "$FORGIT_LOG_FORMAT"
+set -g foryadm_pager        "$FORYADM_PAGER"
+set -g foryadm_show_pager   "$FORYADM_SHOW_PAGER"
+set -g foryadm_diff_pager   "$FORYADM_DIFF_PAGER"
+set -g foryadm_ignore_pager "$FORYADM_IGNORE_PAGER"
+set -g foryadm_log_format   "$FORYADM_LOG_FORMAT"
 
-test -z "$forgit_pager";        and set -g forgit_pager        (git config core.pager || echo 'cat')
-test -z "$forgit_show_pager";   and set -g forgit_show_pager   (git config pager.show || echo "$forgit_pager")
-test -z "$forgit_diff_pager";   and set -g forgit_diff_pager   (git config pager.diff || echo "$forgit_pager")
-test -z "$forgit_ignore_pager"; and set -g forgit_ignore_pager (type -q bat >/dev/null 2>&1 && echo 'bat -l gitignore --color=always' || echo 'cat')
-test -z "$forgit_log_format";   and set -g forgit_log_format   "-%C(auto)%h%d %s %C(black)%C(bold)%cr%Creset"
+test -z "$foryadm_pager";        and set -g foryadm_pager        (yadm config core.pager || echo 'cat')
+test -z "$foryadm_show_pager";   and set -g foryadm_show_pager   (yadm config pager.show || echo "$foryadm_pager")
+test -z "$foryadm_diff_pager";   and set -g foryadm_diff_pager   (yadm config pager.diff || echo "$foryadm_pager")
+test -z "$foryadm_ignore_pager"; and set -g foryadm_ignore_pager (type -q bat >/dev/null 2>&1 && echo 'bat -l gitignore --color=always' || echo 'cat')
+test -z "$foryadm_log_format";   and set -g foryadm_log_format   "-%C(auto)%h%d %s %C(black)%C(bold)%cr%Creset"
 
 # https://github.com/wfxr/emoji-cli
-type -q emojify >/dev/null 2>&1 && set -g forgit_emojify '|emojify'
+type -q emojify >/dev/null 2>&1 && set -g foryadm_emojify '|emojify'
 
-# git commit viewer
-function forgit::log -d "git commit viewer"
-    forgit::inside_work_tree || return 1
+# yadm commit viewer
+function foryadm::log -d "yadm commit viewer"
+    foryadm::inside_work_tree || return 1
 
     set files (echo $argv | sed -nE 's/.* -- (.*)/\1/p')
-    set cmd "echo {} |grep -Eo '[a-f0-9]+' |head -1 |xargs -I% git show --color=always % -- $files | $forgit_show_pager"
+    set cmd "echo {} |grep -Eo '[a-f0-9]+' |head -1 |xargs -I% yadm show --color=always % -- $files | $foryadm_show_pager"
 
-    if test -n "$FORGIT_COPY_CMD"
-        set copy_cmd $FORGIT_COPY_CMD
+    if test -n "$FORYADM_COPY_CMD"
+        set copy_cmd $FORYADM_COPY_CMD
     else
         set copy_cmd pbcopy
     end
 
     set opts "
-        $FORGIT_FZF_DEFAULT_OPTS
+        $FORYADM_FZF_DEFAULT_OPTS
         +s +m --tiebreak=index
         --bind=\"enter:execute($cmd |env LESS='-r' less)\"
         --bind=\"ctrl-y:execute-silent(echo {} |grep -Eo '[a-f0-9]+' | head -1 | tr -d '[:space:]' |$copy_cmd)\"
-        $FORGIT_LOG_FZF_OPTS
+        $FORYADM_LOG_FZF_OPTS
     "
 
-    if set -q FORGIT_LOG_GRAPH_ENABLE
+    if set -q FORYADM_LOG_GRAPH_ENABLE
         set graph "--graph"
     else
         set graph ""
     end
 
-    eval "git log $graph --color=always --format='$forgit_log_format' $argv $forgit_emojify" |
+    eval "yadm log $graph --color=always --format='$foryadm_log_format' $argv $foryadm_emojify" |
         env FZF_DEFAULT_OPTS="$opts" fzf --preview="$cmd"
 end
 
-## git diff viewer
-function forgit::diff -d "git diff viewer" 
-    forgit::inside_work_tree || return 1
+## yadm diff viewer
+function foryadm::diff -d "yadm diff viewer" 
+    foryadm::inside_work_tree || return 1
     if count $argv > /dev/null
-        if git rev-parse "$1" > /dev/null 2>&1
+        if yadm rev-parse "$1" > /dev/null 2>&1
             set commit "$1" && set files "$2"
         else
             set files "$argv"
         end
     end
 
-    set repo (git rev-parse --show-toplevel)
-    set cmd "echo {} |sed 's/.*]  //' | xargs -I% git diff --color=always $commit -- '$repo/%' | $forgit_diff_pager"
+    set repo (yadm rev-parse --show-toplevel)
+    set cmd "echo {} |sed 's/.*]  //' | xargs -I% yadm diff --color=always $commit -- '$repo/%' | $foryadm_diff_pager"
     set opts "
-        $FORGIT_FZF_DEFAULT_OPTS
+        $FORYADM_FZF_DEFAULT_OPTS
         +m -0 --bind=\"enter:execute($cmd |env LESS='-r' less)\"
-        $FORGIT_DIFF_FZF_OPTS
+        $FORYADM_DIFF_FZF_OPTS
     "
 
-    eval "git diff --name-only $commit -- $files*| sed -E 's/^(.)[[:space:]]+(.*)\$/[\1]  \2/'" | env FZF_DEFAULT_OPTS="$opts" fzf --preview="$cmd"
+    eval "yadm diff --name-only $commit -- $files*| sed -E 's/^(.)[[:space:]]+(.*)\$/[\1]  \2/'" | env FZF_DEFAULT_OPTS="$opts" fzf --preview="$cmd"
 end
 
-# git add selector
-function forgit::add -d "git add selector"
-    forgit::inside_work_tree || return 1
+# yadm add selector
+function foryadm::add -d "yadm add selector"
+    foryadm::inside_work_tree || return 1
     # Add files if passed as arguments
-    count $argv >/dev/null && git add "$argv" && git status --short && return
+    count $argv >/dev/null && yadm add "$argv" && yadm status --short && return
 
-    set changed (git config --get-color color.status.changed red)
-    set unmerged (git config --get-color color.status.unmerged red)
-    set untracked (git config --get-color color.status.untracked red)
+    set changed (yadm config --get-color color.status.changed red)
+    set unmerged (yadm config --get-color color.status.unmerged red)
+    set untracked (yadm config --get-color color.status.untracked red)
 
     set extract_file "
         sed 's/^[[:space:]]*//' |           # remove leading whitespace
@@ -99,18 +99,18 @@ function forgit::add -d "git add selector"
     set preview "
         set file (echo {} | $extract_file)
         # exit
-        if test (git status -s -- \$file | grep '^??') # diff with /dev/null for untracked files
-            git diff --color=always --no-index -- /dev/null \$file | $forgit_diff_pager | sed '2 s/added:/untracked:/'
+        if test (yadm status -s -- \$file | grep '^??') # diff with /dev/null for untracked files
+            yadm diff --color=always --no-index -- /dev/null \$file | $foryadm_diff_pager | sed '2 s/added:/untracked:/'
         else
-            git diff --color=always -- \$file | $forgit_diff_pager
+            yadm diff --color=always -- \$file | $foryadm_diff_pager
         end
         "
     set opts "
-        $FORGIT_FZF_DEFAULT_OPTS
+        $FORYADM_FZF_DEFAULT_OPTS
         -0 -m --nth 2..,..
-        $FORGIT_ADD_FZF_OPTS
+        $FORYADM_ADD_FZF_OPTS
     "
-    set files (git -c color.status=always -c status.relativePaths=true status -su |
+    set files (yadm -c color.status=always -c status.relativePaths=true status -su |
         grep -F -e "$changed" -e "$unmerged" -e "$untracked" |
         sed -E 's/^(..[^[:space:]]*)[[:space:]]+(.*)\$/[\1]  \2/' |   # deal with white spaces internal to fname
         env FZF_DEFAULT_OPTS="$opts" fzf --preview="$preview" |
@@ -118,283 +118,283 @@ function forgit::add -d "git add selector"
 
     if test -n "$files"
         for file in $files
-            echo $file | tr '\n' '\0' | xargs -I{} -0 git add {}
+            echo $file | tr '\n' '\0' | xargs -I{} -0 yadm add {}
         end
-        git status --short
+        yadm status --short
         return
     end
     echo 'Nothing to add.'
 end
 
-## git reset HEAD (unstage) selector
-function forgit::reset::head -d "git reset HEAD (unstage) selector"
-    forgit::inside_work_tree || return 1
-    set cmd "git diff --cached --color=always -- {} | $forgit_diff_pager"
+## yadm reset HEAD (unstage) selector
+function foryadm::reset::head -d "yadm reset HEAD (unstage) selector"
+    foryadm::inside_work_tree || return 1
+    set cmd "yadm diff --cached --color=always -- {} | $foryadm_diff_pager"
     set opts "
-        $FORGIT_FZF_DEFAULT_OPTS
+        $FORYADM_FZF_DEFAULT_OPTS
         -m -0
-        $FORGIT_RESET_HEAD_FZF_OPTS
+        $FORYADM_RESET_HEAD_FZF_OPTS
     "
-    set files (git diff --cached --name-only --relative | env FZF_DEFAULT_OPTS="$opts" fzf --preview="$cmd")
+    set files (yadm diff --cached --name-only --relative | env FZF_DEFAULT_OPTS="$opts" fzf --preview="$cmd")
     if test -n "$files"
         for file in $files
-            echo $file | tr '\n' '\0' |xargs -I{} -0 git reset -q HEAD {}
+            echo $file | tr '\n' '\0' |xargs -I{} -0 yadm reset -q HEAD {}
         end
-        git status --short
+        yadm status --short
         return
     end
     echo 'Nothing to unstage.'
 end
 
-# git checkout-restore selector
-function forgit::checkout::file -d "git checkout-file selector" --argument-names 'file_name'
-    forgit::inside_work_tree || return 1
+# yadm checkout-restore selector
+function foryadm::checkout::file -d "yadm checkout-file selector" --argument-names 'file_name'
+    foryadm::inside_work_tree || return 1
 
     if test -n "$file_name"
-        git checkout -- "$file_name"
+        yadm checkout -- "$file_name"
         set checkout_status $status
-        git status --short
+        yadm status --short
         return $checkout_status
     end
 
 
-    set cmd "git diff --color=always -- {} | $forgit_diff_pager"
+    set cmd "yadm diff --color=always -- {} | $foryadm_diff_pager"
     set opts "
-        $FORGIT_FZF_DEFAULT_OPTS
+        $FORYADM_FZF_DEFAULT_OPTS
         -m -0
-        $FORGIT_CHECKOUT_FILE_FZF_OPTS
+        $FORYADM_CHECKOUT_FILE_FZF_OPTS
     "
-    set git_rev_parse (git rev-parse --show-toplevel)
-    set files (git ls-files --modified "$git_rev_parse" | env FZF_DEFAULT_OPTS="$opts" fzf --preview="$cmd")
+    set git_rev_parse (yadm rev-parse --show-toplevel)
+    set files (yadm ls-files --modified "$git_rev_parse" | env FZF_DEFAULT_OPTS="$opts" fzf --preview="$cmd")
 
     if test -n "$files"
         for file in $files
-            echo $file | tr '\n' '\0' | xargs -I{} -0 git checkout -q {}
+            echo $file | tr '\n' '\0' | xargs -I{} -0 yadm checkout -q {}
         end
-        git status --short
+        yadm status --short
         return
     end
     echo 'Nothing to restore.'
 end
 
-function forgit::checkout::commit -d "git checkout commit selector" --argument-names 'commit_id'
-    forgit::inside_work_tree || return 1
+function foryadm::checkout::commit -d "yadm checkout commit selector" --argument-names 'commit_id'
+    foryadm::inside_work_tree || return 1
 
     if test -n "$commit_id"
-        git checkout "$commit_id"
+        yadm checkout "$commit_id"
         set checkout_status $status
-        git status --short
+        yadm status --short
         return $checkout_status
     end
 
-    if test -n "$FORGIT_COPY_CMD"
-        set copy_cmd $FORGIT_COPY_CMD
+    if test -n "$FORYADM_COPY_CMD"
+        set copy_cmd $FORYADM_COPY_CMD
     else
         set copy_cmd pbcopy
     end
 
 
-    set cmd "echo {} |grep -Eo '[a-f0-9]+' |head -1 |xargs -I% git show --color=always % | $forgit_show_pager"
+    set cmd "echo {} |grep -Eo '[a-f0-9]+' |head -1 |xargs -I% yadm show --color=always % | $foryadm_show_pager"
     set opts "
-        $FORGIT_FZF_DEFAULT_OPTS
+        $FORYADM_FZF_DEFAULT_OPTS
         +s +m --tiebreak=index
         --bind=\"ctrl-y:execute-silent(echo {} |grep -Eo '[a-f0-9]+' | head -1 | tr -d '[:space:]' | $copy_cmd)\"
-        $FORGIT_COMMIT_FZF_OPTS
+        $FORYADM_COMMIT_FZF_OPTS
     "
 
-    if set -q FORGIT_LOG_GRAPH_ENABLE
+    if set -q FORYADM_LOG_GRAPH_ENABLE
         set graph "--graph"
     else
         set graph ""
     end
 
-    eval "git log $graph --color=always --format='$forgit_log_format' $forgit_emojify" |
-        FZF_DEFAULT_OPTS="$opts" fzf --preview="$cmd" |grep -Eo '[a-f0-9]+' |head -1 |xargs -I% git checkout % --
+    eval "yadm log $graph --color=always --format='$foryadm_log_format' $foryadm_emojify" |
+        FZF_DEFAULT_OPTS="$opts" fzf --preview="$cmd" |grep -Eo '[a-f0-9]+' |head -1 |xargs -I% yadm checkout % --
 end
 
 
-function forgit::checkout::branch -d "git checkout branch selector" --argument-names 'branch_name'
-    forgit::inside_work_tree || return 1
+function foryadm::checkout::branch -d "yadm checkout branch selector" --argument-names 'branch_name'
+    foryadm::inside_work_tree || return 1
 
     if test -n "$branch_name"
-        git checkout -b "$branch_name"
+        yadm checkout -b "$branch_name"
         set checkout_status $status
-        git status --short
+        yadm status --short
         return $checkout_status
     end
 
-    set cmd "git branch --color=always --verbose --all --format=\"%(if:equals=HEAD)%(refname:strip=3)%(then)%(else)%(refname:short)%(end)\" $argv $forgit_emojify | sed '/^\$/d'"
-    set preview "git log {} --graph --pretty=format:'$forgit_log_format' --color=always --abbrev-commit --date=relative"
+    set cmd "yadm branch --color=always --verbose --all --format=\"%(if:equals=HEAD)%(refname:strip=3)%(then)%(else)%(refname:short)%(end)\" $argv $foryadm_emojify | sed '/^\$/d'"
+    set preview "yadm log {} --graph --pretty=format:'$foryadm_log_format' --color=always --abbrev-commit --date=relative"
 
     set opts "
-        $FORGIT_FZF_DEFAULT_OPTS
+        $FORYADM_FZF_DEFAULT_OPTS
         +s +m --tiebreak=index 
-        $FORGIT_CHECKOUT_BRANCH_FZF_OPTS
+        $FORYADM_CHECKOUT_BRANCH_FZF_OPTS
         "
-    eval "$cmd" | env FZF_DEFAULT_OPTS="$opts" fzf --preview="$preview" | xargs -I% git checkout %
+    eval "$cmd" | env FZF_DEFAULT_OPTS="$opts" fzf --preview="$preview" | xargs -I% yadm checkout %
 end
 
-# git stash viewer
-function forgit::stash::show -d "git stash viewer"
-    forgit::inside_work_tree || return 1
-    set cmd "echo {} |cut -d: -f1 |xargs -I% git stash show --color=always --ext-diff % |$forgit_diff_pager"
+# yadm stash viewer
+function foryadm::stash::show -d "yadm stash viewer"
+    foryadm::inside_work_tree || return 1
+    set cmd "echo {} |cut -d: -f1 |xargs -I% yadm stash show --color=always --ext-diff % |$foryadm_diff_pager"
     set opts "
-        $FORGIT_FZF_DEFAULT_OPTS
+        $FORYADM_FZF_DEFAULT_OPTS
         +s +m -0 --tiebreak=index --bind=\"enter:execute($cmd |env LESS='-r' less)\"
-        $FORGIT_STASH_FZF_OPTS
+        $FORYADM_STASH_FZF_OPTS
     "
-    git stash list | env FZF_DEFAULT_OPTS="$opts" fzf --preview="$cmd"
+    yadm stash list | env FZF_DEFAULT_OPTS="$opts" fzf --preview="$cmd"
 end
 
-# git clean selector
-function forgit::clean -d "git clean selector"
-    forgit::inside_work_tree || return 1
+# yadm clean selector
+function foryadm::clean -d "yadm clean selector"
+    foryadm::inside_work_tree || return 1
 
     set opts "
-        $FORGIT_FZF_DEFAULT_OPTS
+        $FORYADM_FZF_DEFAULT_OPTS
         -m -0
-        $FORGIT_CLEAN_FZF_OPTS
+        $FORYADM_CLEAN_FZF_OPTS
     "
 
-    set files (git clean -xdffn $argv| awk '{print $3}'| env FZF_DEFAULT_OPTS="$opts" fzf |sed 's#/$##')
+    set files (yadm clean -xdffn $argv| awk '{print $3}'| env FZF_DEFAULT_OPTS="$opts" fzf |sed 's#/$##')
 
     if test -n "$files"
         for file in $files
-            echo $file | tr '\n' '\0'| xargs -0 -I{} git clean -xdff {}
+            echo $file | tr '\n' '\0'| xargs -0 -I{} yadm clean -xdff {}
         end
-        git status --short
+        yadm status --short
         return
     end
     echo 'Nothing to clean.'
 end
 
-function forgit::cherry::pick -d "git cherry-picking" --argument-names 'target'
-    forgit::inside_work_tree || return 1
-    set base (git branch --show-current)
+function foryadm::cherry::pick -d "yadm cherry-picking" --argument-names 'target'
+    foryadm::inside_work_tree || return 1
+    set base (yadm branch --show-current)
     if test -n "$target"
         echo "Please specify target branch"
         return 1
     end
-    set preview "echo {1} | xargs -I% git show --color=always % | $forgit_show_pager"
+    set preview "echo {1} | xargs -I% yadm show --color=always % | $foryadm_show_pager"
     set opts "
-        $FORGIT_FZF_DEFAULT_OPTS
+        $FORYADM_FZF_DEFAULT_OPTS
         -m -0
     "
     echo $base
     echo $target
-    git cherry "$base" "$target" --abbrev -v | cut -d ' ' -f2- |
+    yadm cherry "$base" "$target" --abbrev -v | cut -d ' ' -f2- |
         env FZF_DEFAULT_OPTS="$opts" fzf --preview="$preview" | cut -d' ' -f1 |
-        xargs -I% git cherry-pick %
+        xargs -I% yadm cherry-pick %
 end
 
-function forgit::fixup -d "git fixup"
-    forgit::inside_work_tree || return 1
-    git diff --cached --quiet && echo 'Nothing to fixup: there are no staged changes.' && return 1
+function foryadm::fixup -d "yadm fixup"
+    foryadm::inside_work_tree || return 1
+    yadm diff --cached --quiet && echo 'Nothing to fixup: there are no staged changes.' && return 1
 
-    if set -q FORGIT_LOG_GRAPH_ENABLE
+    if set -q FORYADM_LOG_GRAPH_ENABLE
         set graph "--graph"
     else
         set graph ""
     end
 
-    set cmd "git log $graph --color=always --format='$forgit_log_format' $argv $forgit_emojify"
+    set cmd "yadm log $graph --color=always --format='$foryadm_log_format' $argv $foryadm_emojify"
     set files (echo $argv | sed -nE 's/.* -- (.*)/\1/p')
-    set preview "echo {} |grep -Eo '[a-f0-9]+' |head -1 |xargs -I% git show --color=always % -- $files | $forgit_show_pager"
+    set preview "echo {} |grep -Eo '[a-f0-9]+' |head -1 |xargs -I% yadm show --color=always % -- $files | $foryadm_show_pager"
 
-    if test -n "$FORGIT_COPY_CMD"
-        set copy_cmd $FORGIT_COPY_CMD
+    if test -n "$FORYADM_COPY_CMD"
+        set copy_cmd $FORYADM_COPY_CMD
     else
         set copy_cmd pbcopy
     end
 
     set opts "
-        $FORGIT_FZF_DEFAULT_OPTS
+        $FORYADM_FZF_DEFAULT_OPTS
         +s +m --tiebreak=index
         --bind=\"ctrl-y:execute-silent(echo {} |grep -Eo '[a-f0-9]+' | head -1 | tr -d '[:space:]' |$copy_cmd)\"
-        $FORGIT_FIXUP_FZF_OPTS
+        $FORYADM_FIXUP_FZF_OPTS
     "
 
     set target_commit (eval "$cmd" | FZF_DEFAULT_OPTS="$opts" fzf --preview="$preview" | grep -Eo '[a-f0-9]+' | head -1)
 
-    if test -n "$target_commit" && git commit --fixup "$target_commit"
+    if test -n "$target_commit" && yadm commit --fixup "$target_commit"
         # "$target_commit~" is invalid when the commit is the first commit, but we can use "--root" instead
         set prev_commit "$target_commit~"
-        if test "(git rev-parse '$target_commit')" = "(git rev-list --max-parents=0 HEAD)"
+        if test "(yadm rev-parse '$target_commit')" = "(yadm rev-list --max-parents=0 HEAD)"
             set prev_commit "--root"
         end
 
-        GIT_SEQUENCE_EDITOR=: git rebase --autostash -i --autosquash "$prev_commit"
+        GIT_SEQUENCE_EDITOR=: yadm rebase --autostash -i --autosquash "$prev_commit"
     end
 
 end
 
 
-function forgit::rebase -d "git rebase"
-    forgit::inside_work_tree || return 1
+function foryadm::rebase -d "yadm rebase"
+    foryadm::inside_work_tree || return 1
 
-    if set -q FORGIT_LOG_GRAPH_ENABLE
+    if set -q FORYADM_LOG_GRAPH_ENABLE
         set graph "--graph"
     else
         set graph ""
     end
-    set cmd "git log $graph --color=always --format='$forgit_log_format' $argv $forgit_emojify"
+    set cmd "yadm log $graph --color=always --format='$foryadm_log_format' $argv $foryadm_emojify"
 
     set files (echo $argv | sed -nE 's/.* -- (.*)/\1/p')
-    set preview "echo {} |grep -Eo '[a-f0-9]+' |head -1 |xargs -I% git show --color=always % -- $files | $forgit_show_pager"
+    set preview "echo {} |grep -Eo '[a-f0-9]+' |head -1 |xargs -I% yadm show --color=always % -- $files | $foryadm_show_pager"
 
-    if test -n "$FORGIT_COPY_CMD"
-        set copy_cmd $FORGIT_COPY_CMD
+    if test -n "$FORYADM_COPY_CMD"
+        set copy_cmd $FORYADM_COPY_CMD
     else
         set copy_cmd pbcopy
     end
 
     set opts "
-        $FORGIT_FZF_DEFAULT_OPTS
+        $FORYADM_FZF_DEFAULT_OPTS
         +s +m --tiebreak=index
         --bind=\"ctrl-y:execute-silent(echo {} |grep -Eo '[a-f0-9]+' | head -1 | tr -d '[:space:]' |$copy_cmd)\"
-        $FORGIT_REBASE_FZF_OPTS
+        $FORYADM_REBASE_FZF_OPTS
     "
     set commit (eval "$cmd" | FZF_DEFAULT_OPTS="$opts" fzf --preview="$preview" |
         grep -Eo '[a-f0-9]+' | head -1)
 
     if test $commit
-        git rebase -i "$commit"
+        yadm rebase -i "$commit"
     end
 end
 
-# git ignore generator
-if test -z "$FORGIT_GI_REPO_REMOTE"
-    set -g FORGIT_GI_REPO_REMOTE https://github.com/dvcs/gitignore
+# yadm ignore generator
+if test -z "$FORYADM_GI_REPO_REMOTE"
+    set -g FORYADM_GI_REPO_REMOTE https://github.com/dvcs/gitignore
 end
 
-if test -z "$FORGIT_GI_REPO_LOCAL"
+if test -z "$FORYADM_GI_REPO_LOCAL"
     if test "XDG_CACHE_HOME"
-        set -g FORGIT_GI_REPO_LOCAL $XDG_CACHE_HOME/forgit/gi/repos/dvcs/gitignore
+        set -g FORYADM_GI_REPO_LOCAL $XDG_CACHE_HOME/forgit/gi/repos/dvcs/gitignore
     else
-        set -g FORGIT_GI_REPO_LOCAL $HOME/.cache/forgit/gi/repos/dvcs/gitignore
+        set -g FORYADM_GI_REPO_LOCAL $HOME/.cache/forgit/gi/repos/dvcs/gitignore
     end
 end
 
-if test -z "$FORGIT_GI_TEMPLATES"
-    set -g FORGIT_GI_TEMPLATES $FORGIT_GI_REPO_LOCAL/templates
+if test -z "$FORYADM_GI_TEMPLATES"
+    set -g FORYADM_GI_TEMPLATES $FORYADM_GI_REPO_LOCAL/templates
 end
 
-function forgit::ignore -d "git ignore generator"
-    if not test -d "$FORGIT_GI_REPO_LOCAL"
-        forgit::ignore::update
+function foryadm::ignore -d "yadm ignore generator"
+    if not test -d "$FORYADM_GI_REPO_LOCAL"
+        foryadm::ignore::update
     end
 
-    set cmd "$forgit_ignore_pager $FORGIT_GI_TEMPLATES/{2}{,.gitignore} 2>/dev/null"
+    set cmd "$foryadm_ignore_pager $FORYADM_GI_TEMPLATES/{2}{,.gitignore} 2>/dev/null"
     set opts "
-        $FORGIT_FZF_DEFAULT_OPTS
+        $FORYADM_FZF_DEFAULT_OPTS
         -m --preview-window='right:70%'
-        $FORGIT_IGNORE_FZF_OPTS
+        $FORYADM_IGNORE_FZF_OPTS
     "
     set IFS '\n'
 
     set args $argv
     if not count $argv > /dev/null
-        set args (forgit::ignore::list | nl -nrn -w4 -s'  ' |
+        set args (foryadm::ignore::list | nl -nrn -w4 -s'  ' |
         env FZF_DEFAULT_OPTS="$opts" fzf --preview="$cmd"  |awk '{print $2}')
     end
 
@@ -402,42 +402,42 @@ function forgit::ignore -d "git ignore generator"
          return 1
      end
 
-     forgit::ignore::get $args
+     foryadm::ignore::get $args
 end
 
-function forgit::ignore::update
-    if test -d "$FORGIT_GI_REPO_LOCAL"
-        forgit::info 'Updating gitignore repo...'
-        set pull_result (git -C "$FORGIT_GI_REPO_LOCAL" pull --no-rebase --ff)
+function foryadm::ignore::update
+    if test -d "$FORYADM_GI_REPO_LOCAL"
+        foryadm::info 'Updating gitignore repo...'
+        set pull_result (yadm -C "$FORYADM_GI_REPO_LOCAL" pull --no-rebase --ff)
         test -n "$pull_result" || return 1
     else
-        forgit::info 'Initializing gitignore repo...'
-        git clone --depth=1 "$FORGIT_GI_REPO_REMOTE" "$FORGIT_GI_REPO_LOCAL"
+        foryadm::info 'Initializing gitignore repo...'
+        yadm clone --depth=1 "$FORYADM_GI_REPO_REMOTE" "$FORYADM_GI_REPO_LOCAL"
     end
 end
 
-function forgit::ignore::get
+function foryadm::ignore::get
     for item in $argv
-        set filename (find -L "$FORGIT_GI_TEMPLATES" -type f \( -iname "$item.gitignore" -o -iname "$item}" \) -print -quit)
+        set filename (find -L "$FORYADM_GI_TEMPLATES" -type f \( -iname "$item.gitignore" -o -iname "$item}" \) -print -quit)
         if test -n "$filename"
             set header $filename && set header (echo $filename | sed 's/.*\.//')
             echo "### $header" && cat "$filename" && echo
         else
-            forgit::warn "No gitignore template found for '$item'." && continue
+            foryadm::warn "No gitignore template found for '$item'." && continue
         end
     end
 end
 
-function forgit::ignore::list
-    find "$FORGIT_GI_TEMPLATES" -print |sed -e 's#.gitignore$##' -e 's#.*/##' | sort -fu
+function foryadm::ignore::list
+    find "$FORYADM_GI_TEMPLATES" -print |sed -e 's#.gitignore$##' -e 's#.*/##' | sort -fu
 end
 
-function forgit::ignore::clean
+function foryadm::ignore::clean
     setopt localoptions rmstarsilent
-    [[ -d "$FORGIT_GI_REPO_LOCAL" ]] && rm -rf "$FORGIT_GI_REPO_LOCAL"
+    [[ -d "$FORYADM_GI_REPO_LOCAL" ]] && rm -rf "$FORYADM_GI_REPO_LOCAL"
 end
 
-set -g FORGIT_FZF_DEFAULT_OPTS "
+set -g FORYADM_FZF_DEFAULT_OPTS "
 $FZF_DEFAULT_OPTS
 --ansi
 --height='80%'
@@ -449,87 +449,87 @@ $FZF_DEFAULT_OPTS
 --bind='alt-w:toggle-preview-wrap'
 --preview-window='right:60%'
 +1
-$FORGIT_FZF_DEFAULT_OPTS
+$FORYADM_FZF_DEFAULT_OPTS
 "
 
 # register aliases
-if test -z "$FORGIT_NO_ALIASES"
-    if test -n "$forgit_add"
-        alias $forgit_add 'forgit::add'
+if test -z "$FORYADM_NO_ALIASES"
+    if test -n "$foryadm_add"
+        alias $foryadm_add 'foryadm::add'
     else
-        alias ga 'forgit::add'
+        alias yada 'foryadm::add'
     end
 
-    if test -n "$forgit_reset_head"
-        alias $forgit_reset_head 'forgit::reset::head'
+    if test -n "$foryadm_reset_head"
+        alias $foryadm_reset_head 'foryadm::reset::head'
     else
-        alias grh 'forgit::reset::head'
+        alias yadrh 'foryadm::reset::head'
     end
 
-    if test -n "$forgit_log"
-        alias $forgit_log 'forgit::log'
+    if test -n "$foryadm_log"
+        alias $foryadm_log 'foryadm::log'
     else
-        alias glo 'forgit::log'
+        alias yadlo 'foryadm::log'
     end
 
-    if test -n "$forgit_diff"
-        alias $forgit_diff 'forgit::diff'
+    if test -n "$foryadm_diff"
+        alias $foryadm_diff 'foryadm::diff'
     else
-        alias gd 'forgit::diff'
+        alias yadd 'foryadm::diff'
     end
 
-    if test -n "$forgit_ignore"
-        alias $forgit_ignore 'forgit::ignore'
+    if test -n "$foryadm_ignore"
+        alias $foryadm_ignore 'foryadm::ignore'
     else
-        alias gi 'forgit::ignore'
+        alias yadi 'foryadm::ignore'
     end
 
-    if test -n "$forgit_checkout_file"
-        alias $forgit_checkout_file 'forgit::checkout::file'
+    if test -n "$foryadm_checkout_file"
+        alias $foryadm_checkout_file 'foryadm::checkout::file'
     else
-        alias gcf 'forgit::checkout::file'
+        alias yadcf 'foryadm::checkout::file'
     end
 
-    if test -n "$forgit_checkout_branch"
-        alias $forgit_branch 'forgit::checkout::branch'
+    if test -n "$foryadm_checkout_branch"
+        alias $foryadm_branch 'foryadm::checkout::branch'
     else
-        alias gcb 'forgit::checkout::branch'
+        alias yadcb 'foryadm::checkout::branch'
     end
 
-    if test -n "$forgit_clean"
-        alias $forgit_clean 'forgit::clean'
+    if test -n "$foryadm_clean"
+        alias $foryadm_clean 'foryadm::clean'
     else
-        alias gclean 'forgit::clean'
+        alias yadclean 'foryadm::clean'
     end
 
-    if test -n "$forgit_stash_show"
-        alias $forgit_stash_show 'forgit::stash::show'
+    if test -n "$foryadm_stash_show"
+        alias $foryadm_stash_show 'foryadm::stash::show'
     else
-        alias gss 'forgit::stash::show'
+        alias yadss 'foryadm::stash::show'
     end
 
-    if test -n "$forgit_cherry_pick"
-        alias $forgit_cherry_pick 'forgit::cherry::pick'
+    if test -n "$foryadm_cherry_pick"
+        alias $foryadm_cherry_pick 'foryadm::cherry::pick'
     else
-        alias gcp 'forgit::cherry::pick'
+        alias yadcp 'foryadm::cherry::pick'
     end
 
-    if test -n "$forgit_rebase"
-        alias $forgit_rebase 'forgit::rebase'
+    if test -n "$foryadm_rebase"
+        alias $foryadm_rebase 'foryadm::rebase'
     else
-        alias grb 'forgit::rebase'
+        alias yadrb 'foryadm::rebase'
     end
 
-    if test -n "$forgit_fixup"
-        alias $forgit_fixup 'forgit::fixup'
+    if test -n "$foryadm_fixup"
+        alias $foryadm_fixup 'foryadm::fixup'
     else
-        alias gfu 'forgit::fixup'
+        alias yadfu 'foryadm::fixup'
     end
 
-    if test -n "$forgit_checkout_commit"
-        alias $forgit_checkout_commit 'forgit::checkout::commit'
+    if test -n "$foryadm_checkout_commit"
+        alias $foryadm_checkout_commit 'foryadm::checkout::commit'
     else
-        alias gco 'forgit::checkout::commit'
+        alias yadco 'foryadm::checkout::commit'
     end
 
 end

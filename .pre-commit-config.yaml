@@ -18,5 +18,5 @@ repos:
     entry: >
       sh -c '
         (curl -fsSL https://wfxr.mit-license.org/2017/license.txt && echo) > ./LICENSE &&
-            git add ./LICENSE || { git checkout ./LICENSE && exit 1; }
+            yadm add ./LICENSE || { yadm checkout ./LICENSE && exit 1; }
       '
