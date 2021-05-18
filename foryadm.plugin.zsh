@@ -59,13 +59,13 @@ foryadm::diff() {
 foryadm::add() {
     foryadm::inside_work_tree || return 1
     # Add files if passed as arguments
-    [[ $# -ne 0 ]] && yadm add "$@" && yadm status -su && return
+    [[ $# -ne 0 ]] && yadm add "$@" && yadm status -s --untracked=normal && return
 
     local changed unmerged untracked files opts preview extract
     changed=$(yadm config --get-color color.status.changed red)
     unmerged=$(yadm config --get-color color.status.unmerged red)
     untracked=$(yadm config --get-color color.status.untracked red)
-    # NOTE: paths listed by 'yadm status -su' mixed with quoted and unquoted style
+    # NOTE: paths listed by 'yadm status -s --untracked=normal' mixed with quoted and unquoted style
     # remove indicators | remove original path for rename case | remove surrounding quotes
     extract="
         sed 's/^.*]  //' |
@@ -83,12 +83,12 @@ foryadm::add() {
         -0 -m --nth 2..,..
         $FORYADM_ADD_FZF_OPTS
     "
-    files=$(yadm -c color.status=always -c status.relativePaths=true status -su |
+    files=$(yadm -c color.status=always -c status.relativePaths=true status -s --untracked=normal |
         grep -F -e "$changed" -e "$unmerged" -e "$untracked" |
         sed -E 's/^(..[^[:space:]]*)[[:space:]]+(.*)$/[\1]  \2/' |
         FZF_DEFAULT_OPTS="$opts" fzf --preview="$preview" |
         sh -c "$extract")
-    [[ -n "$files" ]] && echo "$files"| tr '\n' '\0' |xargs -0 -I% yadm add % && yadm status -su && return
+    [[ -n "$files" ]] && echo "$files"| tr '\n' '\0' |xargs -0 -I% yadm add % && yadm status -s --untracked=normal && return
     echo 'Nothing to add.'
 }
 

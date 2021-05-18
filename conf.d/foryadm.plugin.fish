@@ -110,7 +110,7 @@ function foryadm::add -d "yadm add selector"
         -0 -m --nth 2..,..
         $FORYADM_ADD_FZF_OPTS
     "
-    set files (yadm -c color.status=always -c status.relativePaths=true status -s |
+    set files (yadm -c color.status=always -c status.relativePaths=true status -s --untracked=normal |
         grep -F -e "$changed" -e "$unmerged" -e "$untracked" |
         sed -E 's/^(..[^[:space:]]*)[[:space:]]+(.*)\$/[\1]  \2/' |   # deal with white spaces internal to fname
         env FZF_DEFAULT_OPTS="$opts" fzf --preview="$preview" |
