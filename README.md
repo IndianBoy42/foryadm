@@ -1,11 +1,11 @@
-<h1 align="center">💤 forgit</h1>
+<h1 align="center">💤 foryadm</h1>
 <p align="center">
     <em>Utility tool for using yadm interactively. Powered by <a href="https://github.com/junegunn/fzf">junegunn/fzf</a>.</em>
 </p>
 
 <p align="center">
-    <a href="https://github.com/wfxr/forgit/actions">
-        <img src="https://github.com/wfxr/forgit/workflows/ci/badge.svg"/>
+    <a href="https://github.com/indianboy42/foryadm/actions">
+        <img src="https://github.com/indianboy42/foryadm/workflows/ci/badge.svg"/>
     </a>
     <a href="https://wfxr.mit-license.org/2017">
         <img src="https://img.shields.io/badge/License-MIT-brightgreen.svg"/>
@@ -19,8 +19,8 @@
     <a href="https://github.com/pre-commit/pre-commit">
         <img src="https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white" alt="pre-commit" />
     </a>
-    <a href="https://github.com/wfxr/forgit/graphs/contributors">
-        <img src="https://img.shields.io/github/contributors/wfxr/forgit" alt="Contributors"/>
+    <a href="https://github.com/indianboy42/foryadm/graphs/contributors">
+        <img src="https://img.shields.io/github/contributors/indianboy42/foryadm" alt="Contributors"/>
     </a>
 </p>
 
@@ -33,22 +33,22 @@ It's **lightweight** and **easy to use**.
 
 ``` zsh
 # for zplug
-zplug 'wfxr/forgit'
+zplug 'indianboy42/foryadm'
 
 # for zgen
-zgen load 'wfxr/forgit'
+zgen load 'indianboy42/foryadm'
 
 # for antigen
-antigen bundle 'wfxr/forgit'
+antigen bundle 'indianboy42/foryadm'
 
 # for fisher
-fisher install wfxr/forgit
+fisher install indianboy42/foryadm
 
 # for omf
-omf install https://github.com/wfxr/forgit
+omf install https://github.com/indianboy42/foryadm
 
 # for zinit
-zinit load wfxr/forgit
+zinit load indianboy42/foryadm
 
 # manually
 # Clone the repository and source it in your shell's rc file.
@@ -73,7 +73,7 @@ source (curl -sSL git.io/forgit-fish | psub)
 
 ![screenshot](https://raw.githubusercontent.com/wfxr/i/master/forgit-glo.png)
 
-*The log graph can be disabled by option `FORYADM_LOG_GRAPH_ENABLE` (see discuss in [issue #71](https://github.com/wfxr/forgit/issues/71)).*
+*The log graph can be disabled by option `FORYADM_LOG_GRAPH_ENABLE` (see discuss in [issue #71](https://github.com/indianboy42/foryadm/issues/71)).*
 
 - **Interactive `.gitignore` generator** (`gi`)
 
@@ -148,13 +148,13 @@ Foryadm will use the default configured pager from yadm (`core.pager`,
 `pager.show`, `pager.diff`) but can be altered with the following environment
 variables:
 
-| Use case             | Option                 | Fallbacks to                                   |
-| -------------------- | ---------------------- | ---------------------------------------------- |
-| common pager         | `FORYADM_PAGER`        | `yadm config core.pager` _or_ `cat`            |
-| pager on `yadm show` | `FORYADM_SHOW_PAGER`   | `yadm config pager.show` _or_ `$FORYADM_PAGER` |
-| pager on `yadm diff` | `FORYADM_DIFF_PAGER`   | `yadm config pager.diff` _or_ `$FORYADM_PAGER` |
-| pager on `gitignore` | `FORYADM_IGNORE_PAGER` | `bat -l gitignore --color always` _or_ `cat`   |
-| yadm log format      | `FORYADM_GLO_FORMAT`   | `%C(auto)%h%d %s %C(black)%C(bold)%cr%reset`   |
+| Use case             | Option                 | Fallbacks to                                  |
+| -------------------- | ---------------------- | --------------------------------------------- |
+| common pager         | `FORYADM_PAGER`        | `git config core.pager` _or_ `cat`            |
+| pager on `yadm show` | `FORYADM_SHOW_PAGER`   | `git config pager.show` _or_ `$FORYADM_PAGER` |
+| pager on `yadm diff` | `FORYADM_DIFF_PAGER`   | `git config pager.diff` _or_ `$FORYADM_PAGER` |
+| pager on `gitignore` | `FORYADM_IGNORE_PAGER` | `bat -l gitignore --color always` _or_ `cat`  |
+| yadm log format      | `FORYADM_GLO_FORMAT`   | `%C(auto)%h%d %s %C(black)%C(bold)%cr%reset`  |
 
 #### fzf options
 
@@ -228,7 +228,7 @@ FORYADM_LOG_FZF_OPTS='
 - Most of the commands accept optional arguments (eg, `glo develop`, `glo f738479..188a849b -- main.go`, `gco master`).
 - `gd` supports specifying revision(eg, `gd HEAD~`, `gd v1.0 README.md`).
 - Call `gi` with arguments to get the wanted `.gitignore` contents directly(eg, `gi cmake c++`).
-- You can use the commands as sub-commands of `git`, see [#147](https://github.com/wfxr/forgit/issues/147) for details.
+- You can use the commands as sub-commands of `git`, see [#147](https://github.com/indianboy42/foryadm/issues/147) for details.
 
 ### 📃 License
 
