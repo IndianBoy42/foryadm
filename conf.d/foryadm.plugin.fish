@@ -62,8 +62,8 @@ end
 function foryadm::diff -d "yadm diff viewer" 
     foryadm::inside_work_tree || return 1
     if count $argv > /dev/null
-        if yadm rev-parse "$1" > /dev/null 2>&1
-            set commit "$1" && set files "$2"
+        if yadm rev-parse "$argv[1]" > /dev/null 2>&1
+            set commit "$argv[1]" && set files "$argv[2..]"
         else
             set files "$argv"
         end
