@@ -223,15 +223,20 @@ function foryadm::checkout::branch -d "yadm checkout branch selector" --argument
         return $checkout_status
     end
 
-    set cmd "yadm branch --color=always --verbose --all --format=\"%(if:equals=HEAD)%(refname:strip=3)%(then)%(else)%(refname:short)%(end)\" $argv $foryadm_emojify | sed '/^\$/d'"
+    set cmd "yadm branch --color=always --verbose --all --format=\"%(if:equals=HEAD)%(refname:strip=3)%(then)%(else)%(refname:short)%(end)\" $argv $foryadm_emojify | sed '/^\$/d' | sort -k1.1,1.1 -r"
     set preview "yadm log {} --graph --pretty=format:'$foryadm_log_format' --color=always --abbrev-commit --date=relative"
 
     set opts "
         $FORYADM_FZF_DEFAULT_OPTS
-        +s +m --tiebreak=index 
+        +s +m --tiebreak=index --header-lines=1
         $FORYADM_CHECKOUT_BRANCH_FZF_OPTS
         "
-    eval "$cmd" | env FZF_DEFAULT_OPTS="$opts" fzf --preview="$preview" | xargs -I% yadm checkout %
+    set branch (eval "$cmd" | env FZF_DEFAULT_OPTS="$opts" fzf --preview="$preview" | xargs -I% yadm checkout % | awk '{print $1}')
+    test -z "$branch" && return 1
+    # track the remote branch if possible
+    if not git checkout --track "$branch" 2>/dev/null
+        git checkout "$branch"
+    end
 end
 
 # yadm stash viewer
