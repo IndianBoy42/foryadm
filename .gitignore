@@ -1,2 +1,4 @@
 ._zinit/
 *.zwc
+conf.d/foryadm.plugin.fish.rej
+foryadm.plugin.zsh.rej
