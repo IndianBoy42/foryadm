@@ -1,1 +1,1 @@
-forgit.plugin.zsh
+foryadm.plugin.zsh
