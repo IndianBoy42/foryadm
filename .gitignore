@@ -2,3 +2,5 @@
 *.zwc
 conf.d/foryadm.plugin.fish.rej
 foryadm.plugin.zsh.rej
+conf.d/foryadm.plugin.fish.orig
+foryadm.plugin.zsh.orig
