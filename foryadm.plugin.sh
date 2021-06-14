@@ -1,0 +1,1 @@
+foryadm.plugin.zsh
