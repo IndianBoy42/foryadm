@@ -84,7 +84,10 @@ end
 function foryadm::add -d "yadm add selector"
     foryadm::inside_work_tree || return 1
     # Add files if passed as arguments
-    count $argv >/dev/null && yadm add $argv && yadm status --short && return
+    count $argv >/dev/null
+    and yadm add $argv 
+    and yadm status --short 
+    and return
 
     set changed (yadm config --get-color color.status.changed red)
     set unmerged (yadm config --get-color color.status.unmerged red)

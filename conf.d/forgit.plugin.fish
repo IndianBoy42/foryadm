@@ -84,7 +84,10 @@ end
 function forgit::add -d "git add selector"
     forgit::inside_work_tree || return 1
     # Add files if passed as arguments
-    count $argv >/dev/null && git add "$argv" && git status --short && return
+    count $argv >/dev/null
+    and git add $argv 
+    and git status --short 
+    and return
 
     set changed (git config --get-color color.status.changed red)
     set unmerged (git config --get-color color.status.unmerged red)
