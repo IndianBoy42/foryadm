@@ -226,8 +226,9 @@ function foryadm::checkout::branch -d "yadm checkout branch selector" --argument
         return $checkout_status
     end
 
-    set cmd "yadm branch --color=always --verbose --all --format=\"%(if:equals=HEAD)%(refname:strip=3)%(then)%(else)%(refname:short)%(end)\" $argv $foryadm_emojify | sed '/^\$/d' | sort -k1.1,1.1 -r"
-    set preview "yadm log {} --graph --pretty=format:'$foryadm_log_format' --color=always --abbrev-commit --date=relative"
+    # set cmd "yadm branch --color=always --verbose --all --format=\"%(if:equals=HEAD)%(refname:strip=3)%(then)%(else)%(refname:short)%(end)\" $foryadm_emojify | sed '/^\$/d' | sort -k1.1,1.1 -r"
+    set cmd "yadm branch --color=always --verbose --all | sort -k1.1,1.1 -r"
+    set preview "yadm log {1} --graph --pretty=format:'$foryadm_log_format' --color=always --abbrev-commit --date=relative"
 
     set opts "
         $FORYADM_FZF_DEFAULT_OPTS
@@ -235,7 +236,9 @@ function foryadm::checkout::branch -d "yadm checkout branch selector" --argument
         $FORYADM_CHECKOUT_BRANCH_FZF_OPTS
         "
     set branch (eval "$cmd" | env FZF_DEFAULT_OPTS="$opts" fzf --preview="$preview" | xargs -I% yadm checkout % | awk '{print $1}')
+
     test -z "$branch" && return 1
+
     # track the remote branch if possible
     if not git checkout --track "$branch" 2>/dev/null
         git checkout "$branch"
@@ -279,7 +282,7 @@ end
 function foryadm::cherry::pick -d "yadm cherry-picking" --argument-names 'target'
     foryadm::inside_work_tree || return 1
     set base (yadm branch --show-current)
-    if test -n "$target"
+    if test -z "$target"
         echo "Please specify target branch"
         return 1
     end

@@ -227,6 +227,7 @@ function forgit::checkout::branch -d "git checkout branch selector" --argument-n
     end
 
     set cmd "git branch --color=always --verbose --all | sort -k1.1,1.1 -r"
+    # set cmd "git branch --color=always --verbose --all  --format=\"%(if:equals=HEAD)%(refname:strip=3)%(then)%(else)%(refname:short)%(end)\" $foryadm_emojify | sed '/^\$/d' | sort -k1.1,1.1 -r"
     set preview "git log {1} --graph --pretty=format:'$forgit_log_format' --color=always --abbrev-commit --date=relative"
 
     set opts "
